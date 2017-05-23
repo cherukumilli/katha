@@ -132,45 +132,12 @@
         return 120;
       }
 
-      static get MEDIA_DEVICES_CONSTRAINTS() {
-        return {
-          audio: true,
-          video: false
-        };
-      }
-
-      static get MEDIA_RECORDER_OPTIONS() {
-        let options = {
-          mimeType: 'video/webm;codecs=vp9'
-        };
-        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-          console.log(options.mimeType + ' is not Supported');
-          options = {
-            mimeType: 'video/webm;codecs=vp8'
-          };
-          if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-            console.log(options.mimeType + ' is not Supported');
-            options = {
-              mimeType: 'video/webm'
-            };
-            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-              console.log(options.mimeType + ' is not Supported');
-              options = {
-                mimeType: ''
-              };
-            }
-          }
-        }
-
-        return options;
-      }
-
       static get properties() {
         return {
           __playing: {
             type: Boolean,
             value: false,
-            observer: '__playingChanged'
+            observer: '__playingChanged',
           },
           __recordText: {
             type: String,
@@ -198,7 +165,7 @@
           __elapsedTime: {
             type: Number,
             value: 0,
-            observer: '__elapsedTimeChanged'
+            observer: '__elapsedTimeChanged',
           },
           __timeoutId: {
             type: Number,
@@ -227,15 +194,14 @@
       }
 
       __startRecording() {
-        this.$.file.addEventListener('change', this.__stopRecording.bind(this), {passive: true});
+        this.$.file.addEventListener('change', this.__stopRecording.bind(this), {passive: true}); // eslint-disable-line
         this.__updateElapsedTime();
         this.$.file.click();
       }
 
       __stopRecording(e) {
-        // stop recording if the recording has already started and save the file if any
         this.$.audio.src = URL.createObjectURL(e.target.files[0]);
-        this.$.file.removeEventListener('change', this.__stopRecording.bind(this), {passive: true});
+        this.$.file.removeEventListener('change', this.__stopRecording.bind(this), {passive: true}); // eslint-disable-line
         this.__hideRecordDiv = true;
       }
 
@@ -256,7 +222,8 @@
       }
 
       __playingChanged(newValue, oldValue) {
-        if (!newValue && oldValue === undefined) return; //do nothing during first time the variable initializes
+        // do nothing during first time the variable initializes
+        if (!newValue && oldValue === undefined) return; // eslint-disable-line
 
         if (newValue) {
           this.__startPlaying();
@@ -267,7 +234,7 @@
 
       __updateElapsedTime() {
         this._timeoutId = setTimeout(() => {
-          this.__elapsedTime = Number((performance.now() - this.__startTime) / 1000).toPrecision(4);
+          this.__elapsedTime = Number((performance.now() - this.__startTime) / 1000).toPrecision(4); // eslint-disable-line
           this.__updateElapsedTime();
         }, 500);
       }
@@ -276,7 +243,7 @@
         if (elapsedTime > 0) {
           if (this.__playing) {
             this.$.playingFab.getRipple().simulatedRipple();
-            if (this.$.audio.ended || elapsedTime > KathaStory2.MAX_RECORDING_TIME) {
+            if (this.$.audio.ended || elapsedTime > KathaStory2.MAX_RECORDING_TIME) { // eslint-disable-line
               this.__playing = false;
             }
           }

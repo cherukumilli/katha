@@ -24,7 +24,7 @@
         test('should instantiate katha-story1', function() {
           var story1 = fixture('BasicView');
           var storyText = story1.shadowRoot.getElementById('storyText');
-          expect(storyText.textContent.length).to.be.above(0);
+          expect(storyText.textContent.length).to.be.above(0); // eslint-disable-line
         });
       });
     </script>

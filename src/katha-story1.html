@@ -22,7 +22,6 @@
 
       #storyText {
         padding: 16px;
-        /*font-size: 1.5em;*/
       }
 
       .fab-position {
@@ -131,29 +130,24 @@
       static get MEDIA_DEVICES_CONSTRAINTS() {
         return {
           audio: true,
-          video: false
+          video: false,
         };
       }
 
       static get MEDIA_RECORDER_OPTIONS() {
         let options = {
-          mimeType: 'video/webm;codecs=vp9'
+          mimeType: 'video/webm;codecs=vp9',
         };
+
         if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-          console.log(options.mimeType + ' is not Supported');
-          options = {
-            mimeType: 'video/webm;codecs=vp8'
-          };
+          console.log(options.mimeType + ' is not Supported'); // eslint-disable-line
+          options.mimeType = 'video/webm;codecs=vp8';
           if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-            console.log(options.mimeType + ' is not Supported');
-            options = {
-              mimeType: 'video/webm'
-            };
+            console.log(options.mimeType + ' is not Supported'); // eslint-disable-line
+            options.mimeType = 'video/webm';
             if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-              console.log(options.mimeType + ' is not Supported');
-              options = {
-                mimeType: ''
-              };
+              console.warn(options.mimeType + ' is not Supported'); // eslint-disable-line
+              options.mimeType = '';
             }
           }
         }
@@ -166,12 +160,12 @@
           __recording: {
             type: Boolean,
             value: false,
-            observer: '__recordingChanged'
+            observer: '__recordingChanged',
           },
           __playing: {
             type: Boolean,
             value: false,
-            observer: '__playingChanged'
+            observer: '__playingChanged',
           },
           __recordText: {
             type: String,
@@ -199,7 +193,7 @@
           __elapsedTime: {
             type: Number,
             value: 0,
-            observer: '__elapsedTimeChanged'
+            observer: '__elapsedTimeChanged',
           },
           __timeoutId: {
             type: Number,
@@ -235,7 +229,7 @@
 
       __stopDataProcessing() {
         const blob = new Blob(this.__recordedChunks, {
-          type: 'video/webm'
+          type: 'video/webm',
         });
         this.__recordedChunks = [];
         this.$.audio.src = window.URL.createObjectURL(blob);
@@ -247,17 +241,15 @@
         this.__startTime = performance.now();
         this.__recordedChunks = [];
 
-        this.__mediaRecorder = new MediaRecorder(stream, KathaStory1.MEDIA_RECORDER_OPTIONS);
-
-        this.__mediaRecorder.addEventListener('dataavailable', this.__startDataProcessing.bind(this));
-        this.__mediaRecorder.addEventListener('stop', this.__stopDataProcessing.bind(this));
+        this.__mediaRecorder = new MediaRecorder(stream, KathaStory1.MEDIA_RECORDER_OPTIONS); // eslint-disable-line
+        this.__mediaRecorder.addEventListener('dataavailable', this.__startDataProcessing.bind(this)); // eslint-disable-line
+        this.__mediaRecorder.addEventListener('stop', this.__stopDataProcessing.bind(this)); // eslint-disable-line
 
         this.__mediaRecorder.start();
         this.__updateElapsedTime();
       }
 
       __stopRecording() {
-        // stop recording if the recording has already started and save the file if any
         clearTimeout(this.__timeoutId);
         this.__mediaRecorder.stop();
         this.__elapsedTime = 0;
@@ -267,14 +259,15 @@
       }
 
       __recordingChanged(newValue, oldValue) {
-        if (!newValue && oldValue === undefined) return; //do nothing during first time the variable initializes
+        // do nothing during first time the variable initializes
+        if (!newValue && oldValue === undefined) return;
 
         if (newValue) {
           // start getUserMedia and start recording
-          navigator.mediaDevices.getUserMedia(KathaStory1.MEDIA_DEVICES_CONSTRAINTS).then(stream => {
+          navigator.mediaDevices.getUserMedia(KathaStory1.MEDIA_DEVICES_CONSTRAINTS).then((stream) => {  // eslint-disable-line
             this.__startRecording(stream);
-          }).catch(err => {
-            console.warn('navigator.mediaDevices.getUserMedia error:', err);
+          }).catch((err) => {
+            console.warn('navigator.mediaDevices.getUserMedia error:', err); // eslint-disable-line
           });
         } else {
           this.__stopRecording();
@@ -298,7 +291,8 @@
       }
 
       __playingChanged(newValue, oldValue) {
-        if (!newValue && oldValue === undefined) return; //do nothing during first time the variable initializes
+        // do nothing during first time the variable initializes
+        if (!newValue && oldValue === undefined) return; // eslint-disable-line
 
         if (newValue) {
           this.__startPlaying();
@@ -309,7 +303,7 @@
 
       __updateElapsedTime() {
         this._timeoutId = setTimeout(() => {
-          this.__elapsedTime = Number((performance.now() - this.__startTime) / 1000).toPrecision(4);
+          this.__elapsedTime = Number((performance.now() - this.__startTime) / 1000).toPrecision(4); // eslint-disable-line
           this.__updateElapsedTime();
         }, 500);
       }
@@ -325,7 +319,7 @@
 
           if (this.__playing) {
             this.$.playingFab.getRipple().simulatedRipple();
-            if (this.$.audio.ended || elapsedTime > KathaStory1.MAX_RECORDING_TIME) {
+            if (this.$.audio.ended || elapsedTime > KathaStory1.MAX_RECORDING_TIME) { // eslint-disable-line
               this.__playing = false;
             }
           }
