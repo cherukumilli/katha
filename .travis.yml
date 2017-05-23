@@ -20,3 +20,5 @@ before_script:
 script:
   - xvfb-run npm run test
   - xvfb-run npm run test:integration
+after_success:
+  - ./scripts/deploy.sh
