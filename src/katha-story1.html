@@ -1,0 +1,339 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+<link rel="import" href="katha-icons.html">
+
+<dom-module id="katha-story1">
+  <template>
+    <style include="shared-styles">
+       :host {
+        display: block;
+        padding: 10px;
+        margin-bottom: 128px;
+      }
+
+      iron-image {
+        width: 100%;
+        height: 400px;
+      }
+
+      #storyText {
+        padding: 16px;
+        /*font-size: 1.5em;*/
+      }
+
+      .fab-position {
+        position: fixed;
+        bottom: 16px;
+        right: 24px;
+        left: 280px;
+      }
+
+      paper-fab {
+        background-color: var(--paper-deep-orange-a700);
+      }
+
+      #controls {
+        @apply --layout-horizontal;
+        @apply --layout-center-justified;
+      }
+
+      .control {
+        @apply --layout-vertical;
+        @apply --layout-center;
+        padding-right: 32px;
+        padding-left: 32px;
+      }
+
+      audio {
+        @apply --layout-self-center;
+      }
+
+      div[hidden] {
+        display: none;
+      }
+
+      small {
+        font-size: 14px;
+        color: var(--error-color);
+      }
+
+      @media (max-width: 1000px) {
+        iron-image {
+          height: 200px;
+        }
+
+         :host {
+          padding: 0px;
+        }
+
+        .card {
+          margin: 0px;
+          padding: 0px;
+          box-shadow: none;
+        }
+
+        .fab-position {
+          left: 24px;
+        }
+      }
+    </style>
+
+    <div class="card">
+      <small>Works on Android and Desktop Chrome/Firefox</small>
+      <iron-image src="/images/manifest/icon-512x512.png" sizing="contain"></iron-image>
+
+      <div id="storyText">
+        A long long time ago there lived a just king and his queen. They had 2 beautiful children. They lived happily in a beautiful
+        palace.
+      </div>
+
+      <div id="controls" class="fab-position">
+        <audio id="audio" controls hidden></audio>
+
+        <div class="control" hidden$="[[__hideRecordDiv]]">
+          <paper-fab id="recordingFab" icon="katha-icons:mic" title="Record" on-tap="__record"></paper-fab>
+          <div>[[__recordText]]</div>
+        </div>
+
+        <div class="control" hidden$="[[!__hideRecordDiv]]">
+          <paper-fab icon="katha-icons:redo" title="retake" on-tap="__retake"></paper-fab>
+          <div>retake</div>
+        </div>
+
+        <div class="control" hidden$="[[!__hideRecordDiv]]">
+          <paper-fab id="playingFab" icon="katha-icons:play-arrow" title="Play" on-tap="__play"></paper-fab>
+          <div>[[__playText]]</div>
+        </div>
+
+        <div class="control" hidden$="[[!__hideRecordDiv]]">
+          <paper-fab icon="katha-icons:cloud-upload" title="save recording" on-tap="__save"></paper-fab>
+          <div>save</div>
+        </div>
+      </div>
+
+    </div>
+  </template>
+
+  <script>
+    class KathaStory1 extends Polymer.Element {
+      static get is() {
+        return 'katha-story1';
+      }
+
+      static get MAX_RECORDING_TIME() {
+        return 120;
+      }
+
+      static get MEDIA_DEVICES_CONSTRAINTS() {
+        return {
+          audio: true,
+          video: false
+        };
+      }
+
+      static get MEDIA_RECORDER_OPTIONS() {
+        let options = {
+          mimeType: 'video/webm;codecs=vp9'
+        };
+        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+          console.log(options.mimeType + ' is not Supported');
+          options = {
+            mimeType: 'video/webm;codecs=vp8'
+          };
+          if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+            console.log(options.mimeType + ' is not Supported');
+            options = {
+              mimeType: 'video/webm'
+            };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+              console.log(options.mimeType + ' is not Supported');
+              options = {
+                mimeType: ''
+              };
+            }
+          }
+        }
+
+        return options;
+      }
+
+      static get properties() {
+        return {
+          __recording: {
+            type: Boolean,
+            value: false,
+            observer: '__recordingChanged'
+          },
+          __playing: {
+            type: Boolean,
+            value: false,
+            observer: '__playingChanged'
+          },
+          __recordText: {
+            type: String,
+            value: 'record',
+          },
+          __playText: {
+            type: String,
+            value: 'play',
+          },
+          __startTime: {
+            type: Number,
+            value: 0,
+          },
+          __mediaRecorder: {
+            type: Object,
+          },
+          __recordChunks: {
+            type: Array,
+            value: [],
+          },
+          __hideRecordDiv: {
+            type: Boolean,
+            value: false,
+          },
+          __elapsedTime: {
+            type: Number,
+            value: 0,
+            observer: '__elapsedTimeChanged'
+          },
+          __timeoutId: {
+            type: Number,
+          },
+        };
+      }
+
+      __retake(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.__hideRecordDiv = false;
+      }
+
+      __record(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        this.__recording = !this.__recording;
+      }
+
+      __play(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        this.__playing = !this.__playing;
+      }
+
+      __startDataProcessing(e) {
+        if (e.data.size > 0) {
+          this.__recordedChunks.push(e.data);
+        }
+      }
+
+      __stopDataProcessing() {
+        const blob = new Blob(this.__recordedChunks, {
+          type: 'video/webm'
+        });
+        this.__recordedChunks = [];
+        this.$.audio.src = window.URL.createObjectURL(blob);
+      }
+
+      __startRecording(stream) {
+        this.__recordText = 'recording...';
+        this.__elapsedTime = 0;
+        this.__startTime = performance.now();
+        this.__recordedChunks = [];
+
+        this.__mediaRecorder = new MediaRecorder(stream, KathaStory1.MEDIA_RECORDER_OPTIONS);
+
+        this.__mediaRecorder.addEventListener('dataavailable', this.__startDataProcessing.bind(this));
+        this.__mediaRecorder.addEventListener('stop', this.__stopDataProcessing.bind(this));
+
+        this.__mediaRecorder.start();
+        this.__updateElapsedTime();
+      }
+
+      __stopRecording() {
+        // stop recording if the recording has already started and save the file if any
+        clearTimeout(this.__timeoutId);
+        this.__mediaRecorder.stop();
+        this.__elapsedTime = 0;
+        this.__recordText = 'record';
+        this.__startTime = 0;
+        this.__hideRecordDiv = true;
+      }
+
+      __recordingChanged(newValue, oldValue) {
+        if (!newValue && oldValue === undefined) return; //do nothing during first time the variable initializes
+
+        if (newValue) {
+          // start getUserMedia and start recording
+          navigator.mediaDevices.getUserMedia(KathaStory1.MEDIA_DEVICES_CONSTRAINTS).then(stream => {
+            this.__startRecording(stream);
+          }).catch(err => {
+            console.warn('navigator.mediaDevices.getUserMedia error:', err);
+          });
+        } else {
+          this.__stopRecording();
+        }
+      }
+
+      __startPlaying() {
+        this.__playText = 'playing...';
+        this.__elapsedTime = 0;
+        this.__startTime = performance.now();
+        this.$.audio.play();
+        this.__updateElapsedTime();
+      }
+
+      __stopPlaying() {
+        clearTimeout(this.__timeoutId);
+        this.$.audio.pause();
+        this.__elapsedTime = 0;
+        this.__playText = 'play';
+        this.__startTime = 0;
+      }
+
+      __playingChanged(newValue, oldValue) {
+        if (!newValue && oldValue === undefined) return; //do nothing during first time the variable initializes
+
+        if (newValue) {
+          this.__startPlaying();
+        } else {
+          this.__stopPlaying();
+        }
+      }
+
+      __updateElapsedTime() {
+        this._timeoutId = setTimeout(() => {
+          this.__elapsedTime = Number((performance.now() - this.__startTime) / 1000).toPrecision(4);
+          this.__updateElapsedTime();
+        }, 500);
+      }
+
+      __elapsedTimeChanged(elapsedTime) {
+        if (elapsedTime > 0) {
+          if (this.__recording) {
+            this.$.recordingFab.getRipple().simulatedRipple();
+            if (elapsedTime > KathaStory1.MAX_RECORDING_TIME) {
+              this.__recording = false;
+            }
+          }
+
+          if (this.__playing) {
+            this.$.playingFab.getRipple().simulatedRipple();
+            if (this.$.audio.ended || elapsedTime > KathaStory1.MAX_RECORDING_TIME) {
+              this.__playing = false;
+            }
+          }
+        }
+      }
+
+    }
+
+    window.customElements.define(KathaStory1.is, KathaStory1);
+  </script>
+</dom-module>

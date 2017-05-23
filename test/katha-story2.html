@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>katha-story2</title>
+
+    <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../bower_components/web-component-tester/browser.js"></script>
+
+    <!-- Import the element to test -->
+    <link rel="import" href="../src/katha-story2.html">
+  </head>
+  <body>
+    <test-fixture id="BasicView">
+      <template>
+        <katha-story2></katha-story2>
+      </template>
+    </test-fixture>
+
+    <script>
+      suite('katha-story2 tests', function() {
+        test('should instantiate katha-story2', function() {
+          var story1 = fixture('BasicView');
+          var storyText = story1.shadowRoot.getElementById('storyText');
+          expect(storyText.textContent.length).to.be.above(0);
+        });
+      });
+    </script>
+  </body>
+</html>

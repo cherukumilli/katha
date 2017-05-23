@@ -1,0 +1,29 @@
+{
+  "hosting": {
+    "public": "build/es6-unbundled",
+    "ignore": [
+      "test/**",
+      "scripts/**",
+      "bower.json",
+      "firebase.*",
+      "package.json",
+      "polymer.json",
+      "*.md",
+      ".*",
+      "**/.*",
+      "*.yml",
+      "gulp*",
+      "wct.conf.json"
+    ],
+    "rewrites": [
+      {
+        "source": "!/__/**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "**/!(*.js|*.html|*.css|*.json|*.svg|*.png|*.jpg|*.jpeg)",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
