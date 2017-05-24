@@ -1,5 +1,5 @@
 language: node_js
-sudo: required
+sudo: false
 dist: trusty
 addons:
   firefox: "latest"
@@ -8,6 +8,8 @@ addons:
       - google-chrome
     packages:
       - google-chrome-stable
+git:
+  - depth: 3
 node_js:
   - "6"
 install:
