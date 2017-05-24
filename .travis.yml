@@ -11,6 +11,7 @@ addons:
       - google-chrome
     packages:
       - google-chrome-stable
+  sauce_connect: true
 
 git:
   depth: 3
@@ -28,7 +29,8 @@ before_script:
   - npm run lint
 
 script:
-  - xvfb-run npm run test
+  - xvfb-run npm run test:travis
+  - if [ "${TRAVIS_PULL_REQUEST}" = "false" ]; then npm run test:sauce; fi
   - xvfb-run npm run test:integration
 
 after_success:
